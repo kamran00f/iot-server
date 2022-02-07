@@ -1,0 +1,7 @@
+valgrind check the run
+have facility to send email for issues such as when dns update fails or send some notifications as emails (in addition to push notfications to connected apps)
+A usage of notification (email or app) is for example when a node detects door is open for longer than a certain period
+have a persistence logging feature per node, so that we can see a history of what the node has communicated, a good example is when the door is opened and closed and also videos of a camera when in detects motion
+Make unittests
+Add encryption to messages?
+Documentation

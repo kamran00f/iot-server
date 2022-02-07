@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+repo_root=$(dirname $(readlink -f $0))
+systemd_script=$'
+[Unit]
+Description=iot-server
+After=network.target
+
+[Service]
+ExecStart='$repo_root'/build/iot-server
+WorkingDirectory='$repo_root'/build/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=default.target
+'
+
+echo "$systemd_script" | sudo tee /etc/systemd/system/iotserver.service > /dev/null
