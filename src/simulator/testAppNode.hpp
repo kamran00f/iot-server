@@ -9,7 +9,7 @@
 class AppNode : private TestNode
 {
 private:
-    using LogLevel = Utilities::Logger::LogLevel;
+    using LogLevel = Logger::LogLevel;
 
     std::string nodeName;
     uint32_t    nodeId;
@@ -24,7 +24,7 @@ private:
 
     void log(std::string message, LogLevel logLevel = LogLevel::Debug) const
     {
-        Utilities::Logger::logMessage("AppNode:: " + message, logLevel);
+        Logger::logMessage("AppNode:: " + message, logLevel);
     }
 
 public:

@@ -20,13 +20,13 @@ public:
     void handleMessage(const Node *node, const Message &message) const;
 
 private:
-    using LogLevel = Utilities::Logger::LogLevel;
+    using LogLevel = Logger::LogLevel;
 
     // DeviceInterface::DeviceInterface deviceInterface;
 
     static void dataThreadProcessor(ServerNode *self);
     void        log(const std::string &message, LogLevel logLevel = LogLevel::Info) const
     {
-        Utilities::Logger::logMessage("ServerNode:: " + message, logLevel);
+        Logger::logMessage("ServerNode:: " + message, logLevel);
     }
 };

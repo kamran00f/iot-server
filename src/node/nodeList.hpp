@@ -18,7 +18,7 @@ public:
     void     nodeRegistered(Node *node);
 
 private:
-    using LogLevel = Utilities::Logger::LogLevel;
+    using LogLevel = Logger::LogLevel;
 
     static constexpr uint32_t minNodeId = 1;
 
@@ -27,6 +27,6 @@ private:
 
     void log(const std::string &message, LogLevel logLevel = LogLevel::Info) const
     {
-        Utilities::Logger::logMessage("NodeList:: " + message, logLevel);
+        Logger::logMessage("NodeList:: " + message, logLevel);
     }
 };

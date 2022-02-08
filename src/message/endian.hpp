@@ -3,8 +3,6 @@
 #include <stdint.h>
 #include <cstring>
 
-namespace Utilities
-{
 enum Endianness
 {
     LittleEndian,
@@ -13,10 +11,6 @@ enum Endianness
 
 class Endian
 {
-private:
-    Endian() {}
-    ~Endian() {}
-
 public:
     // Returns instance of singleton
     static Endian &Instance()
@@ -96,5 +90,8 @@ public:
             readVal = swapEndianness(readVal);
         out = readVal;
     }
+
+private:
+    Endian()  = default;
+    ~Endian() = default;
 };
-} // namespace Utilities

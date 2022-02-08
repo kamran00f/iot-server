@@ -2,7 +2,9 @@
 #include <stdexcept>
 
 #include "message.hpp"
-#include "crc.hpp"
+
+// Enforcing compiler to generate CRC<uint32_t>
+template class CRC<uint32_t>;
 
 Message::Message(const uint32_t sourceId,
                  const uint32_t destinationId,
@@ -33,7 +35,7 @@ uint32_t Message::readUint32(const uint32_t index) const
                              ", data.size()=" + std::to_string(data.size());
         throw std::runtime_error(excmsg);
     }
-    Utilities::Endian::Instance().readWithEndianness(retVal, data.data() + index, messageEndianness);
+    Endian::Instance().readWithEndianness(retVal, data.data() + index, messageEndianness);
     return retVal;
 }
 
@@ -62,7 +64,7 @@ void Message::encode(const uint32_t sourceId,
                                  ", data.size()=" + std::to_string(data.size());
             throw std::runtime_error(excmsg);
         }
-        Utilities::Endian::Instance().writeWithEndianness(val, data.data() + index, messageEndianness);
+        Endian::Instance().writeWithEndianness(val, data.data() + index, messageEndianness);
     };
 
     reset();
@@ -77,7 +79,7 @@ void Message::encode(const uint32_t sourceId,
         writeFieldRaw(messagePayloadIndex, payload, payload_len);
     }
 
-    uint32_t crc32 = Utilities::crc32_instance.calculate(data.data(), messageLen - messageCrcBytesNum);
+    uint32_t crc32 = crc32_instance.calculate(data.data(), messageLen - messageCrcBytesNum);
     writeUint32(messageLen - messageCrcBytesNum, crc32);
     isValid = true;
 }
@@ -95,7 +97,7 @@ void Message::decode(const uint8_t *bytes, const size_t bytesLen)
     memcpy(data.data(), bytes, bytesLen);
 
     uint32_t receivedCrc   = readUint32(bytesLen - messageCrcBytesNum);
-    uint32_t calculatedCrc = Utilities::crc32_instance.calculate(bytes, bytesLen - messageCrcBytesNum);
+    uint32_t calculatedCrc = crc32_instance.calculate(bytes, bytesLen - messageCrcBytesNum);
     if(calculatedCrc != receivedCrc)
     {
         isValid = false;

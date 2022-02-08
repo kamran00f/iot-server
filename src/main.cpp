@@ -12,15 +12,15 @@ int main(int argc, char *argv[])
         // Main application loop
         try
         {
-            Utilities::Logger::setGlobalLogLevel(Utilities::Logger::LogLevel::Debug);
-            Utilities::Logger::logMessage("=== Starting IoT server app ===", Utilities::Logger::LogLevel::Info);
+            Logger::setGlobalLogLevel(Logger::LogLevel::Debug);
+            Logger::logMessage("=== Starting IoT server app ===", Logger::LogLevel::Info);
             Server server;
 
             AppNode testAppNode("Test App Node");
 
-            // Utilities::Logger::logMessage("Starting DNS updater",
-            //   Utilities::Logger::LogLevel::Info);
-            // Utilities::DnsUpdater dnsUpdater(3600); // Update DNS every 1 hour
+            // Logger::logMessage("Starting DNS updater",
+            //   Logger::LogLevel::Info);
+            // DnsUpdater dnsUpdater(3600); // Update DNS every 1 hour
 
             while(true)
             {
@@ -29,8 +29,7 @@ int main(int argc, char *argv[])
         }
         catch(const std::exception &e)
         {
-            Utilities::Logger::logMessage("Exception! Error: " + std::string(e.what()),
-                                          Utilities::Logger::LogLevel::Error);
+            Logger::logMessage("Exception! Error: " + std::string(e.what()), Logger::LogLevel::Error);
             sleep(1);
         }
     }

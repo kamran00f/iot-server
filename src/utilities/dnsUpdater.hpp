@@ -3,10 +3,8 @@
 #include <thread>
 #include <curl/curl.h>
 
-#include "utilities/logger.hpp"
+#include "logger.hpp"
 
-namespace Utilities
-{
 class DnsUpdater
 {
 private:
@@ -18,7 +16,7 @@ private:
         "MzUxMDk5MToyNDQ1Nzc3NjY6YWY3MjZlZjQ3OTY3YTkxNTUyZWY5NTIyMDMxM2M1NjA1YzVjODc5YmM4NzAwZTg5N2"
         "E1OTJlNmE1ZTk4MmMxYg";
 
-    using LogLevel = Utilities::Logger::LogLevel;
+    using LogLevel = Logger::LogLevel;
 
     CURL *       curl;
     std::thread  updaterThread;
@@ -34,7 +32,7 @@ private:
 
     void log(const std::string &message, LogLevel logLevel = LogLevel::Info) const
     {
-        Utilities::Logger::logMessage("DnsUpdater:: " + message, logLevel);
+        Logger::logMessage("DnsUpdater:: " + message, logLevel);
     }
 
 public:
@@ -42,4 +40,3 @@ public:
     DnsUpdater(const int intervalSeconds = minUpdateIntervalSeconds);
     ~DnsUpdater();
 };
-} // namespace Utilities

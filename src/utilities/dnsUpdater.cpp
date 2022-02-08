@@ -4,8 +4,6 @@
 
 #include "dnsUpdater.hpp"
 
-namespace Utilities
-{
 DnsUpdater::DnsUpdater(const int intervalSeconds)
 {
     if(intervalSeconds < minUpdateIntervalSeconds)
@@ -96,4 +94,3 @@ void DnsUpdater::updateThread(DnsUpdater *obj)
         sleep(sleepSeconds);
     }
 }
-} // namespace Utilities

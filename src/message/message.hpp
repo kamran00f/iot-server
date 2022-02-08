@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "endian.hpp"
+#include "crc.hpp"
 
 class Message
 {
@@ -33,6 +34,8 @@ private:
     static constexpr uint32_t messagePayloadIndex = 12;
     static constexpr size_t   messageCrcBytesNum  = 4;
 
+    inline static CRC<uint32_t> crc32_instance;
+
     bool                 isValid;
     std::vector<uint8_t> data;
 
@@ -43,10 +46,10 @@ private:
     uint32_t readUint32(const uint32_t index) const;
 
 public:
-    static constexpr size_t                overheadLen       = messagePayloadIndex + messageCrcBytesNum;
-    static constexpr size_t                maxPayloadLen     = 1024 * 32; // Max 32KB payload size
-    static constexpr size_t                maxMessageLen     = maxPayloadLen + overheadLen;
-    static constexpr Utilities::Endianness messageEndianness = Utilities::Endianness::LittleEndian;
+    static constexpr size_t     overheadLen       = messagePayloadIndex + messageCrcBytesNum;
+    static constexpr size_t     maxPayloadLen     = 1024 * 32; // Max 32KB payload size
+    static constexpr size_t     maxMessageLen     = maxPayloadLen + overheadLen;
+    static constexpr Endianness messageEndianness = Endianness::LittleEndian;
 
     // Copy constructor
     Message(const Message &msg)

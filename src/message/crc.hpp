@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-namespace Utilities
-{
 template <typename T>
 class CRC
 {
@@ -12,13 +10,13 @@ private:
     static constexpr uint32_t WIDTH                       = sizeof(T) * 8;
     static constexpr uint32_t MSB_BIT_INDEX               = WIDTH - 8;
 
-    T    _polynomial;
-    T    _initial_value;
-    T    _final_xor_value;
-    bool _reflect_input;
-    bool _reflect_output;
+    T    polynomial;
+    T    initial_value;
+    T    final_xor_value;
+    bool reflect_input;
+    bool reflect_output;
 
-    T _table[lookup_table_elements_count];
+    T table[lookup_table_elements_count];
 
     uint8_t reflect_byte(const uint8_t byte) const
     {
@@ -58,35 +56,34 @@ private:
                 if((curByte & last_bit_mask) != 0)
                 {
                     curByte <<= 1;
-                    curByte ^= _polynomial;
+                    curByte ^= polynomial;
                 }
                 else
                 {
                     curByte <<= 1;
                 }
             }
-            _table[divident] = curByte;
+            table[divident] = curByte;
         }
     }
 
 public:
-    CRC(const T    polynomial,
-        const T    initial_value,
-        const T    final_xor_value,
-        const bool reflect_input,
-        const bool reflect_output)
+    CRC(const T    polynomial      = 0x4C11DB7,
+        const T    initial_value   = 0xFFFFFFFF,
+        const T    final_xor_value = 0xFFFFFFFF,
+        const bool reflect_input   = true,
+        const bool reflect_output  = true) :
+        polynomial(polynomial),
+        initial_value(initial_value),
+        final_xor_value(final_xor_value),
+        reflect_input(reflect_input),
+        reflect_output(reflect_output)
     {
-        _polynomial      = polynomial;
-        _initial_value   = initial_value;
-        _final_xor_value = final_xor_value;
-        _reflect_input   = reflect_input;
-        _reflect_output  = reflect_output;
-
         calculate_table();
     }
 
     // Initiates a CRC calculation chain
-    T init() const { return _initial_value; }
+    T init() const { return initial_value; }
 
     // Updates given CRC calculation chain
     void update(T &crc, const uint8_t *data, const uint32_t data_len) const
@@ -94,25 +91,25 @@ public:
         for(uint32_t i = 0; i < data_len; i++)
         {
             uint8_t byte = data[i];
-            if(_reflect_input)
+            if(reflect_input)
             {
                 byte = reflect_byte(byte);
             }
 
             /* calculate position in table */
             uint8_t pos = uint8_t((crc ^ (byte << MSB_BIT_INDEX)) >> MSB_BIT_INDEX);
-            crc         = (T)((crc << 8) ^ (T)(_table[pos]));
+            crc         = (T)((crc << 8) ^ (T)(table[pos]));
         }
     }
 
     // Finished CRC calculation chain
     void finish(T &crc) const
     {
-        if(_reflect_output)
+        if(reflect_output)
         {
             reflect(crc);
         }
-        crc ^= _final_xor_value;
+        crc ^= final_xor_value;
     }
 
     // Calculate CRC from bytes
@@ -124,8 +121,3 @@ public:
         return crc;
     }
 };
-
-// A CRC32 calculator instance with default configurations
-static CRC<uint32_t> crc32_instance(0x4C11DB7, 0xFFFFFFFF, 0xFFFFFFFF, true, true);
-
-} // namespace Utilities

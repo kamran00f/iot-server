@@ -35,7 +35,7 @@ public:
 
 private:
     Node()         = delete;
-    using LogLevel = Utilities::Logger::LogLevel;
+    using LogLevel = Logger::LogLevel;
 
     int         fd         = -1;
     std::string ip         = "";
@@ -57,6 +57,6 @@ private:
     static void dataThreadProcessor(Node *self);
     void        log(const std::string &message, LogLevel logLevel = LogLevel::Info) const
     {
-        Utilities::Logger::logMessage("Node:: " + message, logLevel);
+        Logger::logMessage("Node:: " + message, logLevel);
     }
 };

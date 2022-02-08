@@ -23,7 +23,7 @@ private:
     // Constant expressions
     static constexpr uint32_t serverPort = 10000;
     static constexpr uint32_t serverId   = 0;
-    using LogLevel                       = Utilities::Logger::LogLevel;
+    using LogLevel                       = Logger::LogLevel;
 
     // TODO: Improve events, use variant maybe
     struct Event
@@ -81,6 +81,6 @@ private:
 
     void log(const std::string &message, LogLevel logLevel = LogLevel::Info) const
     {
-        Utilities::Logger::logMessage("Server:: " + message, logLevel);
+        Logger::logMessage("Server:: " + message, logLevel);
     }
 };

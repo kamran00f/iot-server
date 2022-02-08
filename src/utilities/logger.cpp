@@ -6,8 +6,6 @@
 
 #include "logger.hpp"
 
-namespace Utilities
-{
 bool Logger::logOutputAllowed(Logger::LogLevel requestedLogLevel)
 {
     if(requestedLogLevel > globalLogLevel || globalLogLevel == LogLevel::None)
@@ -151,5 +149,3 @@ void Logger::logMessage(::std::string message, Logger::LogLevel logLevel)
     }
     loggerMutex.unlock();
 }
-
-} // namespace Utilities

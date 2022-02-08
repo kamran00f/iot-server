@@ -3,8 +3,6 @@
 #include <mutex>
 #include <string>
 
-namespace Utilities
-{
 class Logger
 {
     // TODO: Improve this class, use << or at least variable args for messages
@@ -31,4 +29,3 @@ private:
     static std::string       getColorPrefix(LogLevel LogLevel);
     static std::string       getColorSuffix(LogLevel LogLevel);
 };
-} // namespace Utilities
