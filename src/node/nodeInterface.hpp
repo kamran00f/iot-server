@@ -2,29 +2,27 @@
 #include <string>
 #include <vector>
 
-class Base
+#include "json/single_include/nlohmann/json.hpp"
+
+class InterfaceBase
 {
 public:
-    Base() = delete;
-
     int         getIndex() const { return index; }
     std::string getName() const { return name; }
     std::string getDescription() const { return description; }
 
-protected:
-    Base(int index, const std::string &name, const std::string &description) :
-        index(index), name(name), description(description)
-    {
-    }
-    ~Base() = default;
+    virtual std::string toJsonString(int indent_level, int tab_size) = 0;
 
-private:
+protected:
+    InterfaceBase()  = default;
+    ~InterfaceBase() = default;
+
     int         index;
     std::string name;
     std::string description;
 };
 
-class Argument : public Base
+class Argument : public InterfaceBase
 {
 public:
     enum DataType
@@ -35,16 +33,17 @@ public:
         Byte,
     };
 
-    Argument() = delete;
-    Argument(int index, const std::string &name, const std::string &description, DataType dataType) :
-        Base(index, name, description), dataType(dataType)
-    {
-    }
-    ~Argument() = default;
+    DataType getDataType() { return dataType; }
 
     static DataType getDataTypeFromString(const std::string &dataType);
+    static DataType getDataTypeFromJson(const nlohmann::json &json_obj);
+    static bool     isFixedLengthFromJson(const nlohmann::json &json_obj);
+    static bool     isVariableLengthFromJson(const nlohmann::json &json_obj);
 
-private:
+protected:
+    Argument()  = default;
+    ~Argument() = default;
+
     DataType dataType;
 };
 
@@ -52,38 +51,34 @@ class ArgumentFixedLength : public Argument
 {
 public:
     ArgumentFixedLength() = delete;
+    ArgumentFixedLength(const nlohmann::json &json_obj);
+    ArgumentFixedLength(int index, const std::string &name, const std::string &description, DataType dataType, int len);
     ArgumentFixedLength(int                index,
                         const std::string &name,
                         const std::string &description,
-                        DataType           dataType,
-                        int                len) :
-        Argument(index, name, description, dataType), len(len)
-    {
-        if(len <= 0)
-        {
-            throw std::runtime_error("ArgumentFixedLength: len in invalid, len = " + std::to_string(len));
-        }
-    }
+                        std::string        dataType,
+                        int                len);
     ~ArgumentFixedLength() = default;
 
-    int getLen() const { return len; }
+    int         getLen() const { return len; }
+    std::string toJsonString(int indent_level, int tab_size);
 
 private:
     int len;
 };
 
-class ArgumentVariablesLength : public Argument
+class ArgumentVariableLength : public Argument
 {
 public:
-    ArgumentVariablesLength() = delete;
-    ArgumentVariablesLength(int index, const std::string &name, const std::string &description, DataType dataType) :
-        Argument(index, name, description, dataType)
-    {
-    }
-    ~ArgumentVariablesLength() = default;
+    ArgumentVariableLength() = delete;
+    ArgumentVariableLength(const nlohmann::json &json_obj);
+    ArgumentVariableLength(int index, const std::string &name, const std::string &description, DataType dataType);
+    ArgumentVariableLength(int index, const std::string &name, const std::string &description, std::string dataType);
+    ~ArgumentVariableLength() = default;
+    std::string toJsonString(int indent_level, int tab_size);
 };
 
-class Field : public Base
+class Field : public InterfaceBase
 {
 public:
     using Arguments = std::vector<Argument>;
@@ -95,18 +90,14 @@ public:
         Function,
     };
 
-    Field()  = delete;
-    ~Field() = default;
-
     FieldType getFieldType() const { return fieldType; }
 
     static FieldType getFieldTypeFromString(const std::string &dataType);
+    static FieldType getFieldTypeFromJson(const nlohmann::json &json_obj);
 
 protected:
-    Field(int index, const std::string &name, const std::string &description, FieldType fieldType) :
-        Base(index, name, description), fieldType(fieldType)
-    {
-    }
+    Field()  = default;
+    ~Field() = default;
 
     FieldType fieldType;
 };
@@ -120,28 +111,14 @@ public:
               const std::string &description,
               bool               readAllowed,
               bool               writeAllowed,
-              const Arguments &  arguments) :
-        Field(index, name, description, FieldType::Data),
-        readAllowed(readAllowed),
-        writeAllowed(writeAllowed),
-        arguments(arguments)
-    {
-        if(!(readAllowed || writeAllowed))
-        {
-            throw std::runtime_error("DataField: readAllowed or/and writeAllowed must be set to true");
-        }
-
-        if(arguments.size() <= 0)
-        {
-            throw std::runtime_error("DataField: arguments.size is invalid, arguments.size = " +
-                                     std::to_string(arguments.size()));
-        }
-    }
+              const Arguments &  arguments);
+    DataField(const nlohmann::json &json_obj);
     ~DataField() = default;
 
-    bool      isReadAllowed() const { return readAllowed; }
-    bool      isWriteAllowed() const { return writeAllowed; }
-    Arguments getArguments() const { return arguments; }
+    bool        isReadAllowed() const { return readAllowed; }
+    bool        isWriteAllowed() const { return writeAllowed; }
+    Arguments   getArguments() const { return arguments; }
+    std::string toJsonString(int indent_level, int tab_size);
 
 private:
     bool      readAllowed;
@@ -156,37 +133,20 @@ public:
     TriggerField(int                index,
                  const std::string &name,
                  const std::string &description,
-                 bool               readAllowed,
-                 bool               writeAllowed,
-                 const Arguments &  arguments) :
-        Field(index, name, description, FieldType::Data),
-        readAllowed(readAllowed),
-        writeAllowed(writeAllowed),
-        arguments(arguments)
-    {
-        if(arguments.size() <= 0)
-        {
-            throw std::runtime_error("TriggerField: arguments.size is invalid, arguments.size = " +
-                                     std::to_string(arguments.size()));
-        }
-        if(readAllowed && writeAllowed)
-        {
-            throw std::runtime_error("TriggerField: Trigger cannot be both readable and writable");
-        }
-        if(!(readAllowed || writeAllowed))
-        {
-            throw std::runtime_error("TriggerField: Trigger cannot be neither readable nor writable");
-        }
-    }
+                 bool               input,
+                 bool               output,
+                 const Arguments &  arguments);
+    TriggerField(const nlohmann::json &json_obj);
     ~TriggerField() = default;
 
-    bool      isReadAllowed() const { return readAllowed; }
-    bool      isWriteAllowed() const { return writeAllowed; }
-    Arguments getArguments() const { return arguments; }
+    bool        isReadAllowed() const { return input; }
+    bool        isWriteAllowed() const { return output; }
+    Arguments   getArguments() const { return arguments; }
+    std::string toJsonString(int indent_level, int tab_size);
 
 private:
-    bool      readAllowed;
-    bool      writeAllowed;
+    bool      input;
+    bool      output;
     Arguments arguments;
 };
 
@@ -198,35 +158,32 @@ public:
                   const std::string &name,
                   const std::string &description,
                   const Arguments &  inputArguments,
-                  const Arguments &  outputArguments) :
-        Field(index, name, description, FieldType::Data),
-        inputArguments(inputArguments),
-        outputArguments(outputArguments)
-    {
-    }
+                  const Arguments &  outputArguments);
+    FunctionField(const nlohmann::json &json_obj);
     ~FunctionField() = default;
 
-    Arguments getInputArguments() const { return inputArguments; }
-    Arguments getOutputArguments() const { return outputArguments; }
+    Arguments   getInputArguments() const { return inputArguments; }
+    Arguments   getOutputArguments() const { return outputArguments; }
+    std::string toJsonString(int indent_level, int tab_size);
 
 private:
     Arguments inputArguments;
     Arguments outputArguments;
 };
 
-class Interface : public Base
+class Interface : public InterfaceBase
 {
 public:
     Interface() = delete;
-    Interface(const int                 index,
-              const std::string &       name,
-              const std::string &       description,
-              const std::vector<Field> &fields) :
-        Base(index, name, description), fields(fields)
-    {
-    }
+    Interface(const int                index,
+              const std::string &      name,
+              const std::string &      description,
+              const std::vector<Field> fields);
+    Interface(const nlohmann::json &json_obj);
     ~Interface() = default;
+
     std::vector<Field> getFileds() const { return fields; }
+    std::string        toJsonString(int indent_level, int tab_size);
 
 private:
     std::vector<Field> fields;
@@ -235,23 +192,16 @@ private:
 class NodeInterface
 {
 public:
-    NodeInterface()  = default;
-    ~NodeInterface() = default;
-
+    NodeInterface() = default;
     NodeInterface(float                  interfaceVersion,
                   std::string            nodeType,
                   std::string            nodeName,
                   std::string            nodeDescription,
                   float                  nodeVersion,
-                  std::vector<Interface> interfaces) :
-        interfaceVersion(interfaceVersion),
-        nodeType(nodeType),
-        nodeName(nodeName),
-        nodeDescription(nodeDescription),
-        nodeVersion(nodeVersion),
-        interfaces(interfaces)
-    {
-    }
+                  std::vector<Interface> interfaces);
+    NodeInterface(const nlohmann::json &json_obj);
+    NodeInterface(std::string nodeInterfaceJsonString);
+    ~NodeInterface() = default;
 
     float                  getInterfaceVersion() const { return interfaceVersion; }
     std::string            getNodeType() const { return nodeType; }
@@ -259,6 +209,7 @@ public:
     std::string            getNodeDescription() const { return nodeDescription; }
     float                  getNodeVersion() const { return nodeVersion; }
     std::vector<Interface> getInterfaces() const { return interfaces; }
+    std::string            toJsonString(int tab_size);
 
 private:
     float                  interfaceVersion;

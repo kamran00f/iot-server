@@ -8,24 +8,11 @@
 #include <sstream>
 
 #include "server.hpp"
-
-std::string Server::getServerInterfaceString() const
-{
-    char executablePath[FILENAME_MAX];
-    readlink("/proc/self/exe", executablePath, FILENAME_MAX);
-    std::string       executable              = executablePath;
-    std::string       executableDir           = executable.substr(0, executable.rfind("/"));
-    std::string       serverInterfaceFilePath = executableDir + "/../src/server/serverInterface.json";
-    std::ifstream     serverInterfaceFileStream(serverInterfaceFilePath);
-    std::stringstream ss;
-    ss << serverInterfaceFileStream.rdbuf();
-    serverInterfaceFileStream.close();
-    return ss.str();
-}
+#include "serverNodeInterfaceJson.hpp"
 
 Server::Server() : eventSemaphore(0)
 {
-    serverNode = ServerNode(getServerInterfaceString());
+    serverNode = ServerNode(ServerNodeInterfaceJson);
 
     addrinfo hints, *p;
     memset(&hints, 0, sizeof(hints));
